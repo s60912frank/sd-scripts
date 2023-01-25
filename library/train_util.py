@@ -112,6 +112,15 @@ class BaseDataset(torch.utils.data.Dataset):
       tokens = caption.strip().split(",")
       if self.shuffle_keep_tokens is None:
         random.shuffle(tokens)
+        # keep = int(len(tokens) * random.random())
+        # if keep < 3:
+        #     keep = 3
+        # tokens = tokens[:keep]
+        # keep at least 3
+        # keep = 3
+        # keep_tokens = tokens[:keep]
+        # dropout_tokens = [t for t in tokens[keep:] if random.random() > 0.5]
+        # tokens = keep_tokens + dropout_tokens
       else:
         if len(tokens) > self.shuffle_keep_tokens:
           keep_tokens = tokens[:self.shuffle_keep_tokens]
