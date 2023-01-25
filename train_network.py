@@ -94,8 +94,8 @@ def train(args):
   text_encoder, vae, unet, _ = train_util.load_target_model(args, weight_dtype)
 
   # モデルに xformers とか memory efficient attention を組み込む
-  # train_util.replace_unet_modules(unet, args.mem_eff_attn, args.xformers)
-  unet.enable_xformers_memory_efficient_attention()
+  train_util.replace_unet_modules(unet, args.mem_eff_attn, args.xformers)
+  # unet.enable_xformers_memory_efficient_attention()
 
   # 学習を準備する
   if cache_latents:
