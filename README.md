@@ -2,21 +2,30 @@ This repository contains training, generation and utility scripts for Stable Dif
 
 ## Updates
 
-- 17 Jan. 2023, 2023/1/17
-  - __Important Notice__ 
-  It seems that only a part of LoRA modules are trained when ``gradient_checkpointing`` is enabled. The cause is under investigation, but for the time being, please train without ``gradient_checkpointing``.
-  - __重要なお知らせ__
-  ``gradient_checkpointing`` を有効にすると LoRA モジュールの一部しか学習されないようです。原因は調査中ですが当面は ``gradient_checkpointing`` を指定せずに学習してください。
-- 15 Jan. 2023, 2023/1/15
-  - Added ``--max_train_epochs`` and ``--max_data_loader_n_workers`` option for each training script. 
-  - If you specify the number of training epochs with ``--max_train_epochs``, the number of steps is calculated from the number of epochs automatically.
-  - You can set the number of workers for DataLoader with ``--max_data_loader_n_workers``, default is 8. The lower number may reduce the main memory usage and the time between epochs, but may cause slower dataloading (training).
-  - ``--max_train_epochs`` と ``--max_data_loader_n_workers`` のオプションが学習スクリプトに追加されました。
-  - ``--max_train_epochs`` で学習したいエポック数を指定すると、必要なステップ数が自動的に計算され設定されます。
-  - ``--max_data_loader_n_workers`` で DataLoader の worker 数が指定できます（デフォルトは8）。値を小さくするとメインメモリの使用量が減り、エポック間の待ち時間も短くなるようです。ただしデータ読み込み（学習時間）は長くなる可能性があります。
+__Stable Diffusion web UI now seems to support LoRA trained by ``sd-scripts``.__ Thank you for great work!!! 
 
-Please read [release version 0.3.0](https://github.com/kohya-ss/sd-scripts/releases/tag/v0.3.0) for recent updates.
-最近の更新情報は [release version 0.3.0](https://github.com/kohya-ss/sd-scripts/releases/tag/v0.3.0) をご覧ください。
+Note: The LoRA models for SD 2.x is not supported too in Web UI.
+
+- 24 Jan. 2023, 2023/1/24
+  - Change the default save format to ``.safetensors`` for ``train_network.py``.
+  - Add ``--save_n_epoch_ratio`` option to specify how often to save. Thanks to forestsource! 
+    - For example, if 5 is specified, 5 (or 6) files will be saved in training.
+  - Add feature to pre-caclulate hash to reduce loading time in the extension. Thanks to space-nuko!
+  - Add bucketing matadata. Thanks to space-nuko!
+  - Fix an error with bf16 model in ``gen_img_diffusers.py``.
+  - ``train_network.py`` のモデル保存形式のデフォルトを ``.safetensors`` に変更しました。
+  - モデルを保存する頻度を指定する ``--save_n_epoch_ratio`` オプションが追加されました。forestsource氏に感謝します。
+    - たとえば 5 を指定すると、学習終了までに合計で5個（または6個）のファイルが保存されます。
+  - 拡張でモデル読み込み時間を短縮するためのハッシュ事前計算の機能を追加しました。space-nuko氏に感謝します。
+  - メタデータにbucket情報が追加されました。space-nuko氏に感謝します。
+  - ``gen_img_diffusers.py`` でbf16形式のモデルを読み込んだときのエラーを修正しました。
+
+Stable Diffusion web UI本体で当リポジトリで学習したLoRAモデルによる画像生成がサポートされたようです。
+
+注：SD2.x用のLoRAモデルはサポートされないようです。
+
+Please read [Releases](https://github.com/kohya-ss/sd-scripts/releases) for recent updates.
+最近の更新情報は [Release](https://github.com/kohya-ss/sd-scripts/releases) をご覧ください。
 
 ##
 
@@ -70,7 +79,7 @@ Open a regular Powershell terminal and type the following inside:
 git clone https://github.com/kohya-ss/sd-scripts.git
 cd sd-scripts
 
-python -m venv --system-site-packages venv
+python -m venv venv
 .\venv\Scripts\activate
 
 pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
@@ -82,8 +91,9 @@ cp .\bitsandbytes_windows\cextension.py .\venv\Lib\site-packages\bitsandbytes\ce
 cp .\bitsandbytes_windows\main.py .\venv\Lib\site-packages\bitsandbytes\cuda_setup\main.py
 
 accelerate config
-
 ```
+
+update: ``python -m venv venv`` is seemed to be safer than ``python -m venv --system-site-packages venv`` (some user have packages in global python).
 
 Answers to accelerate config:
 
