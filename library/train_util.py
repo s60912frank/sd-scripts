@@ -218,7 +218,7 @@ class BaseDataset(torch.utils.data.Dataset):
         image_info.bucket_reso = bucket_resos[0]              # bucket_resos contains (width, height) only
 
     # 画像をbucketに分割する
-    self.buckets: list[str] = [[] for _ in range(len(bucket_resos))]
+    self.buckets = [[] for _ in range(len(bucket_resos))]
     reso_to_index = {}
     for i, reso in enumerate(bucket_resos):
       reso_to_index[reso] = i
@@ -557,7 +557,7 @@ class DreamBoothDataset(BaseDataset):
     num_reg_images = 0
     if reg_data_dir:
       print("prepare reg images.")
-      reg_infos: list[ImageInfo] = []
+      reg_infos = []
 
       reg_dirs = os.listdir(reg_data_dir)
       for dir in reg_dirs:
