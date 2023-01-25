@@ -17,7 +17,7 @@ import library.train_util as train_util
 from library.train_util import DreamBoothDataset, FineTuningDataset
 import library.gmin_train_util as gmin_train_util
 from library.gmin_train_util import GminDataset
-from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
+# from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 
 
 def collate_fn(examples):
@@ -168,23 +168,23 @@ def train(args):
     print(f"override steps. steps for {args.max_train_epochs} epochs is / 指定エポックまでのステップ数: {args.max_train_steps}")
 
   # lr schedulerを用意する
-  if args.lr_scheduler == "CosineAnnealingWarmupRestarts":
-    cycle_steps = args.max_train_steps // 10
-    warmup_steps = cycle_steps // 4
-    max_lr = args.learning_rate
-    min_lr = max_lr / 100
-    lr_scheduler = CosineAnnealingWarmupRestarts(optimizer,
-                                          # first_cycle_steps=cycle_steps,
-                                          first_cycle_steps=64,
-                                          cycle_mult=1.0,
-                                          max_lr=max_lr,
-                                          min_lr=min_lr,
-                                          # warmup_steps=warmup_steps,
-                                          warmup_steps=16,
-                                          gamma=0.99)
-  else:
-    lr_scheduler = diffusers.optimization.get_scheduler(
-        args.lr_scheduler, optimizer, num_warmup_steps=args.lr_warmup_steps, num_training_steps=args.max_train_steps * args.gradient_accumulation_steps)
+  # if args.lr_scheduler == "CosineAnnealingWarmupRestarts":
+  #   cycle_steps = args.max_train_steps // 10
+  #   warmup_steps = cycle_steps // 4
+  #   max_lr = args.learning_rate
+  #   min_lr = max_lr / 100
+  #   lr_scheduler = CosineAnnealingWarmupRestarts(optimizer,
+  #                                         # first_cycle_steps=cycle_steps,
+  #                                         first_cycle_steps=64,
+  #                                         cycle_mult=1.0,
+  #                                         max_lr=max_lr,
+  #                                         min_lr=min_lr,
+  #                                         # warmup_steps=warmup_steps,
+  #                                         warmup_steps=16,
+  #                                         gamma=0.99)
+  # else:
+  lr_scheduler = diffusers.optimization.get_scheduler(
+      args.lr_scheduler, optimizer, num_warmup_steps=args.lr_warmup_steps, num_training_steps=args.max_train_steps * args.gradient_accumulation_steps)
 
   # 実験的機能：勾配も含めたfp16学習を行う　モデル全体をfp16にする
   if args.full_fp16:
