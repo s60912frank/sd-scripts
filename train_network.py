@@ -15,6 +15,8 @@ from diffusers import DDPMScheduler
 
 import library.train_util as train_util
 from library.train_util import DreamBoothDataset, FineTuningDataset
+import library.gmin_train_util as gmin_train_util
+from library.gmin_train_util import GminDataset
 from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
 
 
@@ -51,12 +53,20 @@ def train(args):
   tokenizer = train_util.load_tokenizer(args)
 
   # データセットを準備する
-  if use_dreambooth_method:
+  if use_dreambooth_method and args.tag_dump_file is None:
     print("Use DreamBooth method.")
     train_dataset = DreamBoothDataset(args.train_batch_size, args.train_data_dir, args.reg_data_dir,
                                       tokenizer, args.max_token_length, args.caption_extension, args.shuffle_caption, args.keep_tokens,
                                       args.resolution, args.enable_bucket, args.min_bucket_reso, args.max_bucket_reso, args.prior_loss_weight,
                                       args.flip_aug, args.color_aug, args.face_crop_aug_range, args.random_crop, args.debug_dataset)
+    train_dataset.make_buckets()
+  elif args.tag_dump_file is not None:
+    print("Train with gmin dataset.")
+    train_dataset = GminDataset(args.train_batch_size, args.tag_dump_file, args.train_data_dir,
+                                      tokenizer, args.max_token_length, args.shuffle_caption, args.keep_tokens,
+                                      args.resolution, args.enable_bucket, args.min_bucket_reso, args.max_bucket_reso,
+                                      args.flip_aug, args.color_aug, args.face_crop_aug_range, args.random_crop,
+                                      args.dataset_repeats, args.debug_dataset)
   else:
     print("Train with captions.")
     train_dataset = FineTuningDataset(args.in_json, args.train_batch_size, args.train_data_dir,
@@ -64,7 +74,7 @@ def train(args):
                                       args.resolution, args.enable_bucket, args.min_bucket_reso, args.max_bucket_reso,
                                       args.flip_aug, args.color_aug, args.face_crop_aug_range, args.random_crop,
                                       args.dataset_repeats, args.debug_dataset)
-  train_dataset.make_buckets()
+    train_dataset.make_buckets()
 
   if args.debug_dataset:
     train_util.debug_dataset(train_dataset)
@@ -454,6 +464,7 @@ if __name__ == '__main__':
 
   train_util.add_sd_models_arguments(parser)
   train_util.add_dataset_arguments(parser, True, True)
+  gmin_train_util.add_dataset_arguments(parser)
   train_util.add_training_arguments(parser, True)
 
   parser.add_argument("--no_metadata", action='store_true', help="do not save metadata in output model / メタデータを出力先モデルに保存しない")
